@@ -17,3 +17,11 @@
     height: 20px;
     background-color: rgb(231, 85, 18);
 }
+
+.ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: blueviolet;
+}
