@@ -3,8 +3,16 @@ const grid = document.querySelector('.grid')
 const blockLength = 100;
 const blockHeight = 20;
 const boardWidth = 560;
+const boardHeight = 300;
 const ballDiameter = 20; 
 
+const scoreDisplay = document.querySelector(".score");
+
+let score = 0
+
+let timerid;
+let xDirection = -2;
+let yDirection = 2;
 const userStart = [230,10];
 let currentPosition = userStart;
 
@@ -110,18 +118,74 @@ grid.appendChild(ball);
 
 //move ball
 function moveBall() {
-    ballCurrentPosition[0] += 2
-    ballCurrentPosition[1] += 2
-    drawBall()
+    ballCurrentPosition[0] += xDirection
+    ballCurrentPosition[1] += yDirection
+    drawBall();
+    checkForCollision();
+    // console.log(`x: ${ballCurrentPosition[0]}; y: ${ballCurrentPosition[1]}`)
 }
 
-setInterval(() => {
+timerid = setInterval(() => {
     moveBall()
 }, 30);
 
 function checkForCollision() {
-    //check for wall collisions
-    if (ball.currentPosition[0] >= boardWidth - ballDiameter){
-
+    //check for block collisions
+    for (let i =  0; i < blocks.length; i++){
+        if (
+            (ballCurrentPosition[0] > blocks[i].bottomLeft[0] && ballCurrentPosition[0] < blocks[i].bottomRight[0]) &&
+            ((ballCurrentPosition[1] + ballDiameter) > blocks[i].bottomLeft[1] && ballCurrentPosition[0] < blocks[i].topLeft[1])
+        ){
+            const allBlocks = Array.from(document.querySelectorAll(".block"))
+            allBlocks[i].classList.remove("block");
+            blocks.splice(i, 1); //remove from array
+            score++;
+            scoreDisplay.innerHTML = score;
+            changeDirection();
+        }
     }
+
+    // check for user collisions 
+    if (
+        (ballCurrentPosition[0] > currentPosition[0] && ballCurrentPosition[0] < (currentPosition[0] + blockLength)) && 
+        ((ballCurrentPosition[1] > currentPosition[1]) && ballCurrentPosition[1] < currentPosition[1] + blockHeight)
+        )
+    {
+        changeDirection();
+    }
+
+    //check for wall collisions
+    if (ballCurrentPosition[0] >= (boardWidth - ballDiameter) ||  ballCurrentPosition[1] >= (boardHeight - ballDiameter) ||  ballCurrentPosition[0] <= (0)){        
+        changeDirection();
+    }
+    //chech for game over
+    if (ballCurrentPosition[1] <= 0) {
+        clearInterval(timerid);
+        scoreDisplay.innerHTML = "Game over";
+        document.removeEventListener("keydown", moveUser);
+    }
+}
+
+
+
+
+function changeDirection(){
+    if(xDirection === 2 && yDirection === 2){
+        yDirection = -2
+        return
+    }
+    if(xDirection === 2 && yDirection === -2){
+        xDirection = -2
+        return
+    }
+    if(xDirection === -2 && yDirection === -2){
+        yDirection = 2
+        return
+    }
+    if(xDirection === -2 && yDirection === 2){
+        xDirection = 2
+        return
+    }
+   
+    
 }
